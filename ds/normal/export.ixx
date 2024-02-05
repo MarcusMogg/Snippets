@@ -1,4 +1,4 @@
-export module Dsn;
+export module dsn;
 
 // import std;
-export import :Array;
+export import :array;
