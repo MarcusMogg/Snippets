@@ -4,7 +4,7 @@
 //   static int a{0};
 //   return a++;
 // }
-
+extern "C" {
 static int f2() {
   static int a{0};
   return a++;
@@ -13,4 +13,5 @@ static int f2() {
 inline int f3() {
   static int a{0};
   return a++;
+}
 }
