@@ -5,6 +5,9 @@ set_warnings("all", "error")
 
 add_cxxflags("-stdlib=libc++", {tools = "clang"})
 
+add_plugindirs(path.join(os.projectdir(), "plugins"))
+
 includes("3rd")
 includes("ds")
 includes("coroutine-benchmark")
+includes("link-test")
