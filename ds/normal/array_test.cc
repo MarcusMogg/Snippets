@@ -73,7 +73,7 @@ TEST_CASE("array init", "[array]") {
       // complie fail
       // how to check it?
       // auto b = dsn::Array{1, 2u, 3};
-      std::array<int, 1> x;
+      dsn::Array<int, 1> x;
       x.rend();
     }
   }

@@ -3,7 +3,8 @@ add_rules("mode.debug", "mode.release")
 set_languages("cxx23")
 set_warnings("all", "error")
 
-add_cxxflags("-stdlib=libc++", {tools = "clang"})
+-- well, clang++ is not clang
+add_cxxflags("clang++::-stdlib=libc++")
 
 add_plugindirs(path.join(os.projectdir(), "plugins"))
 

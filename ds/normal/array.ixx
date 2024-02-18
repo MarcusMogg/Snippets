@@ -71,7 +71,7 @@ constexpr bool operator==(const Array<T, N>& lhs, const Array<T, N>& rhs) {
   return std::ranges::equal(lhs, rhs);
 }
 template <class T, std::size_t N>
-constexpr auto operator<=>(const std::array<T, N>& lhs, const std::array<T, N>& rhs) {
+constexpr auto operator<=>(const Array<T, N>& lhs, const Array<T, N>& rhs) {
   return std::lexicographical_compare_three_way(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 }
 // ducing guide
