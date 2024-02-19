@@ -1,3 +1,4 @@
+set_default(false)
 set_group("coroutine-benchmark")
 
 add_requires("benchmark")

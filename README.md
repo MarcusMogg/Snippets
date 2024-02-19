@@ -10,5 +10,6 @@ xmake project -k vsxmake -m "debug,release"
 ## llvm
 
 ```shell
- xmake f -m debug --toolchain=llvm 
+## can't understand, xmake only use ldflags when check_cxxsnippets
+xmake f -m release --toolchain=llvm --cxxflags=-stdlib=libc++ --ldflags=-stdlib=libc++ 
 ```

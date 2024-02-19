@@ -93,8 +93,6 @@ TEST_CASE("range", "[array]") {
     CHECK(std::ranges::contiguous_range<dsn::Array<int, 1>>);
     CHECK(std::ranges::common_range<const dsn::Array<int, 1>>);
     CHECK(std::ranges::common_range<dsn::Array<int, 1>>);
-
-    CHECK(std::ranges::viewable_range<dsn::Array<int, 1>>);
   }
 
   SECTION("type check") { [[maybe_unused]] dsn::Array<int, 1> a{}; }

@@ -1,3 +1,4 @@
+set_default(false)
 target("hpp-a")
     set_kind("static")
     add_files("hpp/a.cc")
