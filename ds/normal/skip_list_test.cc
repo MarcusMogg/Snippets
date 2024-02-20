@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <iostream>
+#include <map>
 #include <random>
 #include <ranges>
 import dsn;
@@ -67,6 +68,81 @@ TEST_CASE("", "[skip_list]") {
       s.TryEmplace(i, j);
 
       CHECK(equal());
+    }
+  }
+
+  SECTION("Find") {
+    dsn::SkipList<int, int> s;
+
+    using namespace std::ranges::views;
+    for (auto i : iota(1, 100) | filter([&](auto&& i) { return i % 2 == 1; })) {
+      s.TryEmplace(i, i);
+    }
+
+    CHECK(!s.Contains(0));
+    CHECK(*s.LowerBound(0) == std::pair{1, 1});
+    CHECK(*s.UpperBound(0) == std::pair{1, 1});
+
+    CHECK(s.Contains(1));
+    CHECK(*s.LowerBound(1) == std::pair{1, 1});
+    CHECK(*s.UpperBound(1) == std::pair{3, 3});
+
+    CHECK(!s.Contains(2));
+    CHECK(*s.LowerBound(2) == std::pair{3, 3});
+    CHECK(*s.UpperBound(2) == std::pair{3, 3});
+
+    CHECK(s.Contains(99));
+    CHECK(*s.LowerBound(99) == std::pair{99, 99});
+    CHECK(s.UpperBound(99) == s.cend());
+
+    CHECK(!s.Contains(100));
+    CHECK(s.LowerBound(100) == s.cend());
+    CHECK(s.UpperBound(100) == s.cend());
+  }
+
+  SECTION("const Find") {
+    dsn::SkipList<int, int> s;
+
+    using namespace std::ranges::views;
+    for (auto i : iota(1, 100) | filter([&](auto&& i) { return i % 2 == 1; })) {
+      s.TryEmplace(i, i);
+    }
+    [](const dsn::SkipList<int, int>& s) {
+      CHECK(!s.Contains(0));
+      CHECK(*s.LowerBound(0) == std::pair{1, 1});
+      CHECK(*s.UpperBound(0) == std::pair{1, 1});
+
+      CHECK(s.Contains(1));
+      CHECK(*s.LowerBound(1) == std::pair{1, 1});
+      CHECK(*s.UpperBound(1) == std::pair{3, 3});
+
+      CHECK(!s.Contains(2));
+      CHECK(*s.LowerBound(2) == std::pair{3, 3});
+      CHECK(*s.UpperBound(2) == std::pair{3, 3});
+
+      CHECK(s.Contains(99));
+      CHECK(*s.LowerBound(99) == std::pair{99, 99});
+      CHECK(s.UpperBound(99) == s.cend());
+
+      CHECK(!s.Contains(100));
+      CHECK(s.LowerBound(100) == s.cend());
+      CHECK(s.UpperBound(100) == s.cend());
+    }(s);
+  }
+
+  SECTION("Modify") {
+    dsn::SkipList<int, int> s;
+
+    using namespace std::ranges::views;
+    for (auto i : iota(1, 100) | filter([&](auto&& i) { return i % 2 == 1; })) {
+      s.TryEmplace(i, i);
+    }
+    for (auto i : iota(1, 100) | filter([&](auto&& i) { return i % 2 == 1; })) {
+      s.TryGet(i).transform([](dsn::SkipList<int, int>::value_type& v) { return v.second++; });
+    }
+
+    for (auto i : iota(1, 100) | filter([&](auto&& i) { return i % 2 == 1; })) {
+      CHECK(s.TryGet(i).value().get().second == i + 1);
     }
   }
 }

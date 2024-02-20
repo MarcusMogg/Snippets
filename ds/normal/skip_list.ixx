@@ -1,8 +1,8 @@
 module;
 #include <cstddef>
 #include <functional>
-#include <map>
 #include <memory>
+#include <optional>
 #include <random>
 #include <tuple>
 #include <type_traits>
@@ -89,42 +89,59 @@ class SkipList {
     if (height > GetMaxHeight()) {
       max_height_ = height;
     }
-    std::unique_ptr<Node> new_node_guard(
-        MakeNewNode(std::pair{std::forward<K>(key), Value{std::forward<Args>(args)...}}));
 
-    node = new_node_guard.get();
+    node = MakeNewNode(std::pair{std::forward<K>(key), Value{std::forward<Args>(args)...}});
 
     for (int i = 0; i < height; i++) {
       node->SetNext(i, node_height_prev[i]->Next(i));
       node_height_prev[i]->SetNext(i, node);
     }
-
-    new_node_guard.release();
   }
 
   bool Contains(auto&& key) const {
     const auto it = LowerBound(key);
-    return it != cend() && Equal(it->first, key);
+    return it != cend() && !key_comp_(key, it->first);
+  }
+
+  std::optional<std::reference_wrapper<value_type>> TryGet(auto&& key) {
+    auto it = LowerBound(key);
+    if (it != end() && !key_comp_(key, it->first)) {
+      return *it;
+    }
+    return {};
   }
 
   std::optional<std::reference_wrapper<const value_type>> TryGet(auto&& key) const {
     auto it = LowerBound(key);
-    if (it != cend() && Equal(it->first, key)) {
+    if (it != cend() && !key_comp_(key, it->first)) {
       return *it;
     }
     return {};
   }
   const_iterator UpperBound(auto&& key) const {
-    return const_iterator{this, std::get<0>(FoundWithPrev([&key, this](const Key& node_key) {
-                            // node_key <= key
-                            return !key_comp_(key, node_key);
-                          }))};
+    return {this, std::get<0>(FoundWithPrev([&key, this](const Key& node_key) {
+              // node_key <= key
+              return !key_comp_(key, node_key);
+            }))};
   }
   const_iterator LowerBound(auto&& key) const {
-    return const_iterator{this, std::get<0>(FoundWithPrev([&key, this](const Key& node_key) {
-                            // node_key < key
-                            return key_comp_(node_key, key);
-                          }))};
+    return {this, std::get<0>(FoundWithPrev([&key, this](const Key& node_key) {
+              // node_key < key
+              return key_comp_(node_key, key);
+            }))};
+  }
+
+  iterator UpperBound(auto&& key) {
+    return {this, std::get<0>(FoundWithPrev([&key, this](const Key& node_key) {
+              // node_key <= key
+              return !key_comp_(key, node_key);
+            }))};
+  }
+  iterator LowerBound(auto&& key) {
+    return {this, std::get<0>(FoundWithPrev([&key, this](const Key& node_key) {
+              // node_key < key
+              return key_comp_(node_key, key);
+            }))};
   }
 
   [[nodiscard]] size_t GetMaxHeight() const { return max_height_; }
@@ -180,11 +197,16 @@ class SkipList {
       return resp;
     }
 
-    bool operator==(const Iterator& r) const = default;
+    template <bool RightConst>
+    bool operator==(const Iterator<RightConst>& r) const {
+      return list_ == r.list_ && node_ == r.node_;
+    }
 
    private:
     const SkipList* list_;
     Node* node_;
+
+    friend Iterator<!ConstRef>;
   };
 
  private:
