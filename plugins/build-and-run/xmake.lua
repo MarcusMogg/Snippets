@@ -1,4 +1,3 @@
--- 定义一个名叫hello的插件任务
 task("build-and-run")
     set_category("plugin")
     on_run(function ()
